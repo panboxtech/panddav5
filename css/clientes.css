@@ -1,0 +1,5 @@
+/* clientes.css - estilos específicos para a view de clientes */
+.client-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.client-list .card{margin-bottom:10px}
+.client-modal .grid-2{gap:18px}
+.client-progress .small{font-size:12px;color:#4b7aa6}
