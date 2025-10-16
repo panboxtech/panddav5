@@ -8,9 +8,49 @@
 *{box-sizing:border-box}
 html,body,#app{height:100%;margin:0;background:var(--bg);}
 #app{display:flex;gap:0;min-height:100vh}
-.sidebar{width:220px;background:linear-gradient(180deg,#ffffff,#fbfdff);border-right:1px solid #e6eef6;padding:16px}
-.sidebar.hidden{display:none}
-.main{flex:1;padding:18px}
+.sidebar{
+  width:220px;
+  background:linear-gradient(180deg,#ffffff,#fbfdff);
+  border-right:1px solid #e6eef6;
+  padding:8px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  transition:width 200ms ease, transform 200ms ease;
+  z-index:70;
+  box-shadow: 0 2px 8px rgba(18,30,50,0.03);
+}
+.sidebar.hidden{ display:none; transform:translateX(-120%); }
+.sidebar.minimized{ width:56px; }
+.sidebar .menu-header{display:flex;align-items:center;justify-content:space-between;padding:8px}
+.sidebar .menu-items{display:flex;flex-direction:column;gap:6px;overflow:auto;padding:4px}
+.sidebar .menu-item{
+  display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;
+  color:var(--accent);background:transparent;border:0;text-align:left;cursor:pointer;
+}
+.sidebar .menu-item:hover{background:#f1f8ff}
+.sidebar .menu-item .label{white-space:nowrap;font-weight:500}
+.sidebar.minimized .menu-item .label{display:none}
+.sidebar .toggle-btn{
+  background:transparent;border:1px solid #e6eef6;padding:6px;border-radius:6px;cursor:pointer;color:var(--muted)
+}
+.sidebar .menu-item .icon{width:18px;display:inline-block;text-align:center;color:var(--muted)}
+
+/* ensure fixed buttons (not responsive) */
+@media(max-width:800px){
+  .sidebar{ position:fixed; left:0; top:0; bottom:0; transform:translateX(0); }
+  .sidebar.hidden{ transform:translateX(-120%); display:block; } 
+}
+
+/* main content should adapt to sidebar width */
+.main{transition:margin-left 200ms ease;padding:18px}
+.sidebar + .main{margin-left:220px}
+.sidebar.minimized + .main{margin-left:56px}
+@media(max-width:800px){
+  .sidebar + .main{margin-left:0}
+}
+
+/* existing styles retained */
 .container{max-width:1100px;margin:0 auto}
 .card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 1px 4px rgba(20,30,40,0.04)}
 .h1{font-size:20px;margin:0 0 12px}
