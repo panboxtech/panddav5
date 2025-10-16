@@ -1,0 +1,38 @@
+:root{
+  --bg:#f4f6f8; --card:#fff; --accent:#0b74da; --danger:#e53935; --ok:#2e7d32;
+  --muted:#666;
+  --radius:8px;
+  --gap:12px;
+  font-family: Inter,-system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%;margin:0;background:var(--bg);}
+#app{display:flex;gap:0;min-height:100vh}
+.sidebar{width:220px;background:linear-gradient(180deg,#ffffff,#fbfdff);border-right:1px solid #e6eef6;padding:16px}
+.sidebar.hidden{display:none}
+.main{flex:1;padding:18px}
+.container{max-width:1100px;margin:0 auto}
+.card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 1px 4px rgba(20,30,40,0.04)}
+.h1{font-size:20px;margin:0 0 12px}
+.form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.form-row.column{flex-direction:column;align-items:stretch}
+input[type="text"],input[type="email"],input[type="password"],input[type="date"],input[type="number"],select,textarea{
+  padding:8px;border:1px solid #d9e6f6;border-radius:6px;background:#fff;font-size:14px
+}
+button{padding:8px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+button.ghost{background:transparent;border:1px solid #cfe4fb;color:var(--accent)}
+.small{font-size:13px;color:var(--muted)}
+.toast{position:fixed;right:16px;bottom:16px;background:#222;color:#fff;padding:10px 14px;border-radius:6px}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{padding:8px;border-bottom:1px solid #eef6fc;text-align:left}
+.progress{height:10px;background:#eef7ff;border-radius:6px;overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--accent);width:0}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.mask{letter-spacing:1px}
+.badge{display:inline-block;padding:4px 8px;border-radius:12px;background:#eef6fb;color:var(--accent);font-size:12px}
+.modal{position:fixed;left:0;right:0;top:0;bottom:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;}
+.modal .card{width:min(960px,95%);max-height:90vh;overflow:auto}
+.flex{display:flex;gap:12px;align-items:center}
+.col{flex:1}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.grid-2{grid-template-columns:1fr}.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:60}}
