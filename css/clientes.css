@@ -1,5 +1,28 @@
-/* clientes.css - estilos específicos para a view de clientes */
-.client-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.client-list .card{margin-bottom:10px}
-.client-modal .grid-2{gap:18px}
-.client-progress .small{font-size:12px;color:#4b7aa6}
+/* clientes.css - ajustes para listagem de clientes com card expansível */
+.client-list .card{margin-bottom:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.client-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.client-meta{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.client-actions{display:flex;gap:8px;align-items:center}
+.client-actions .btn{padding:6px 10px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-size:13px}
+.client-actions .btn.ghost{background:transparent;border:1px solid #cfe4fb;color:var(--accent)}
+.client-extra{display:none;border-top:1px solid #eef6fc;padding-top:8px;margin-top:8px}
+.card.expanded{box-shadow:0 6px 20px rgba(10,20,40,0.06);transform:translateY(-2px);transition:all 160ms ease}
+.card.expanded .client-extra{display:block}
+
+/* Expand button styling */
+.expand-toggle{background:transparent;border:1px solid #e6eef6;padding:6px;border-radius:6px;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:6px}
+.expand-toggle .label{display:none}
+@media(min-width:801px){
+  .expand-toggle .label{display:inline}
+}
+
+/* Make clickable area larger on mobile */
+@media(max-width:800px){
+  .client-row{flex-direction:column;align-items:stretch}
+  .client-actions{justify-content:flex-start;flex-wrap:wrap}
+  .card{padding:14px}
+  .card.expanded{width:calc(100% - 24px)}
+}
+
+/* small note styling */
+.client-note{font-size:13px;color:var(--muted)}
