@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pandda Projeto - Mock</title>
+  <link rel="stylesheet" href="css/global.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- menu lateral aparece somente depois do login -->
+    <aside id="sidebar" class="sidebar hidden"></aside>
+    <main id="main" class="main"></main>
+  </div>
+
+  <!-- views -->
+  <template id="view-login"></template>
+  <template id="view-clientes"></template>
+
+  <script src="js/dom-utils.js"></script>
+  <script src="js/mock-provider.js"></script>
+  <script src="js/supabase-service.js"></script>
+  <script src="entities/admin.js"></script>
+  <script src="entities/assinatura.js"></script>
+  <script src="entities/cliente.js"></script>
+  <script src="entities/pontoDeAcesso.js"></script>
+  <script src="views/login.js"></script>
+  <script src="views/clientes.js"></script>
+  <script src="js/app-router.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
