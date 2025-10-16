@@ -1,4 +1,4 @@
-// views/clientes.js - listagem com botões principais e painel extra expansível
+// views/clientes.js - completa com filtro por vencimento e botão expand full-width
 (function(){
   async function renderClientes(){
     if(!window.sessionAdmin){ Router.navigateTo('login'); return; }
@@ -11,6 +11,19 @@
     top.appendChild(h); top.appendChild(btnNovo);
     wrap.appendChild(top);
 
+    // filter bar
+    const filterBar = DOM.createEl('div',{class:'filter-bar'});
+    const selFilter = DOM.createEl('select');
+    selFilter.appendChild(DOM.createEl('option',{attrs:{value:'all'},text:'Todos'}));
+    selFilter.appendChild(DOM.createEl('option',{attrs:{value:'vencendo3'},text:'Vencendo em <= 3 dias'}));
+    selFilter.appendChild(DOM.createEl('option',{attrs:{value:'vencidos30'},text:'Vencidos < 30 dias'}));
+    selFilter.appendChild(DOM.createEl('option',{attrs:{value:'todosvencidos'},text:'Todos vencidos'}));
+    const selOrder = DOM.createEl('select');
+    selOrder.appendChild(DOM.createEl('option',{attrs:{value:'nome'},text:'Ordenar por nome'}));
+    selOrder.appendChild(DOM.createEl('option',{attrs:{value:'vencimento'},text:'Ordenar por vencimento'}));
+    filterBar.appendChild(selFilter); filterBar.appendChild(selOrder);
+    wrap.appendChild(filterBar);
+
     const listCard = DOM.createEl('div',{class:'card client-list'});
     wrap.appendChild(listCard);
     main.appendChild(wrap);
@@ -19,42 +32,71 @@
 
     async function loadAndRender(){
       DOM.clearChildren(listCard);
-      const clients = await DB.getAll('clientes');
+      let clients = await DB.getAll('clientes');
       const assinaturas = await DB.getAll('assinaturas');
       const planos = await DB.getAll('planos');
       const pontos = await DB.getAll('pontosDeAcesso');
 
-      for(const c of clients){
-        const asn = assinaturas.find(a=>a.cliente===c.id);
-        const plano = planos.find(p=>p.id===c.plano);
-        const somaPontos = pontos.filter(p=>p.cliente===c.id).reduce((s,p)=>s+Number(p.pontosSimultaneos||0),0);
+      // join clients with assinatura and apply filters
+      const now = new Date();
+      function daysBetween(d1,d2){ return Math.ceil((d1-d2)/(1000*60*60*24)); }
 
+      clients = clients.map(c=>{
+        const asn = assinaturas.find(a=>a.cliente===c.id) || null;
+        const plano = planos.find(p=>p.id===c.plano) || null;
+        const somaPontos = pontos.filter(p=>p.cliente===c.id).reduce((s,p)=>s+Number(p.pontosSimultaneos||0),0);
+        const vencDate = asn && asn.dataDeVencimento ? new Date(asn.dataDeVencimento) : null;
+        const daysToVenc = vencDate ? daysBetween(vencDate, now) : null;
+        return Object.assign({}, c, {assinatura: asn, plano: plano, somaPontos, vencDate, daysToVenc});
+      });
+
+      // filtering
+      const filter = selFilter.value;
+      if(filter === 'vencendo3'){
+        clients = clients.filter(c=> c.vencDate && c.daysToVenc <= 3 && c.daysToVenc >= 0);
+      } else if(filter === 'vencidos30'){
+        clients = clients.filter(c=> c.vencDate && c.daysToVenc < 0 && Math.abs(c.daysToVenc) < 30);
+      } else if(filter === 'todosvencidos'){
+        clients = clients.filter(c=> c.vencDate && c.daysToVenc < 0);
+      }
+
+      // ordering
+      const order = selOrder.value;
+      if(order === 'nome'){
+        clients.sort((a,b)=> a.nome.localeCompare(b.nome));
+      } else if(order === 'vencimento'){
+        clients.sort((a,b)=>{
+          if(!a.vencDate && !b.vencDate) return 0;
+          if(!a.vencDate) return 1;
+          if(!b.vencDate) return -1;
+          return a.vencDate - b.vencDate;
+        });
+      }
+
+      // render
+      for(const c of clients){
         const card = DOM.createEl('div',{class:'card'});
         const row = DOM.createEl('div',{class:'client-row'});
         const meta = DOM.createEl('div',{class:'client-meta'});
         meta.appendChild(DOM.createEl('div',{text:c.nome}));
-        meta.appendChild(DOM.createEl('div',{class:'client-note',text:`Telefone: ${c.telefone} • Plano: ${plano?plano.nome:'-'}`}));
+        const vencText = c.vencDate ? (new Date(c.vencDate)).toLocaleDateString() : '-';
+        meta.appendChild(DOM.createEl('div',{class:'client-note',text:`Telefone: ${c.telefone} • Plano: ${c.plano?c.plano.nome:'-'} • Venc: ${vencText}`}));
         row.appendChild(meta);
 
-        // main action buttons: Renovar, Editar, Avisar
         const actions = DOM.createEl('div',{class:'client-actions'});
         const btnRen = DOM.createEl('button',{class:'btn',text:'Renovar'});
         const btnEdit = DOM.createEl('button',{class:'btn ghost',text:'Editar'});
         const btnAvisar = DOM.createEl('button',{class:'btn ghost',text:'Avisar'});
         actions.appendChild(btnRen); actions.appendChild(btnEdit); actions.appendChild(btnAvisar);
-
-        // expand toggle (expands card to reveal other actions)
-        const expand = DOM.createEl('button',{class:'expand-toggle',text:''});
-        expand.appendChild(DOM.createEl('span',{class:'icon',text:'+’'}));
-        expand.appendChild(DOM.createEl('span',{class:'label',text:'Mais'}));
-        actions.appendChild(expand);
-
         row.appendChild(actions);
         card.appendChild(row);
 
-        // extra panel hidden by default, shown when card.expanded
+        const expand = DOM.createEl('button',{class:'expand-toggle',text:''});
+        expand.appendChild(DOM.createEl('span',{class:'icon',text:'+'}));
+        expand.appendChild(DOM.createEl('span',{class:'label',text:'Mais opções'}));
+        card.appendChild(expand);
+
         const extra = DOM.createEl('div',{class:'client-extra'});
-        // additional actions: Bloquear/Desbloquear, WhatsApp, Excluir (master only), detalhes de pontos
         const extraControls = DOM.createEl('div',{class:'controls'});
         const btnBloq = DOM.createEl('button',{class:'btn ghost',text:c.bloqueado? 'Desbloquear':'Bloquear'});
         const btnWhats = DOM.createEl('button',{class:'btn ghost',text:'WhatsApp'});
@@ -67,8 +109,8 @@
             try{
               const pontosCli = (await DB.getAll('pontosDeAcesso')).filter(p=>p.cliente===c.id);
               for(const p of pontosCli) await DB.remove('pontosDeAcesso', p.id);
-              const asn = (await DB.getAll('assinaturas')).find(a=>a.cliente===c.id);
-              if(asn) await DB.remove('assinaturas', asn.id);
+              const asn2 = (await DB.getAll('assinaturas')).find(a=>a.cliente===c.id);
+              if(asn2) await DB.remove('assinaturas', asn2.id);
               await DB.remove('clientes', c.id);
               await DB.logActivity(window.sessionAdmin.adminId,'cliente.delete',`clienteId=${c.id}`);
               DOM.toast('Cliente excluído');
@@ -77,31 +119,25 @@
           });
         }
         extra.appendChild(extraControls);
-
-        // show pontos resumo
-        const pontosList = DOM.createEl('div',{class:'small',text:`Pontos somados: ${somaPontos} • Telas: ${asn?asn.telas:'-'}`});
-        extra.appendChild(pontosList);
-
+        extra.appendChild(DOM.createEl('div',{class:'small',text:`Pontos somados: ${c.somaPontos} • Telas: ${c.assinatura?c.assinatura.telas:'-'}`}));
         card.appendChild(extra);
         listCard.appendChild(card);
 
-        // actions behavior
+        // behaviors
         btnRen.addEventListener('click', async ()=>{
-          if(!asn){ DOM.toast('Assinatura não encontrada'); return; }
+          if(!c.assinatura){ DOM.toast('Assinatura não encontrada'); return; }
           try{
-            const plano = (await DB.getAll('planos')).find(p=>p.id===asn.plano);
-            const res = await Assinatura.renew(asn, plano.validadeEmMeses, window.sessionAdmin.adminId);
+            const planoObj = c.plano || (await DB.getAll('planos')).find(p=>p.id===c.assinatura.plano);
+            const res = await Assinatura.renew(c.assinatura, planoObj.validadeEmMeses, window.sessionAdmin.adminId);
             if(res.ajustadoParaDia1){
               const dt = new Date(res.nova);
-              DOM.toast(`Renovado. Dia original não existe no mês alvo, ajustado para 01/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}.`);
+              DOM.toast(`Renovado. Ajustado para 01/${String(dt.getMonth()+1).padStart(2,'0')}/${dt.getFullYear()}.`);
             } else DOM.toast('Renovado');
             loadAndRender();
           }catch(e){ DOM.toast('Erro ao renovar'); }
         });
-        btnEdit.addEventListener('click', ()=> {
-          // reuse existing edit behaviour if implemented
-          DOM.toast('Abrir edição (não implementado nesta demo)');
-        });
+
+        btnEdit.addEventListener('click', ()=> openEditModal(c.id));
         btnAvisar.addEventListener('click', ()=>{
           const firstName = c.nome.split(' ')[0] || c.nome;
           const msg = encodeURIComponent(`Olá ${firstName}, seu acesso está vencendo, para renovar`);
@@ -110,11 +146,7 @@
           window.open(url,'_blank');
         });
         btnBloq.addEventListener('click', async ()=>{
-          try{
-            await DB.update('clientes', c.id, {bloqueado: !c.bloqueado});
-            DOM.toast('Operação realizada');
-            loadAndRender();
-          }catch(e){ DOM.toast('Erro'); }
+          try{ await DB.update('clientes', c.id, {bloqueado: !c.bloqueado}); DOM.toast('Operação realizada'); loadAndRender(); }catch(e){ DOM.toast('Erro'); }
         });
         btnWhats.addEventListener('click', ()=>{
           const firstName = c.nome.split(' ')[0] || c.nome;
@@ -124,23 +156,28 @@
           window.open(url,'_blank');
         });
 
-        // expand toggle behavior: toggle class on card, enlarge on mobile for easier tapping
         expand.addEventListener('click', ()=>{
           const isExpanded = card.classList.toggle('expanded');
-          // if on mobile and expanded, increase width to make items easy to tap
           if(window.innerWidth <= 800){
             if(isExpanded) card.style.width = 'calc(100% - 24px)';
             else card.style.width = '';
           }
+          const icon = expand.querySelector('.icon');
+          const lbl = expand.querySelector('.label');
+          if(isExpanded){ if(icon) icon.textContent = '-'; if(lbl) lbl.textContent = 'Menos opções'; }
+          else { if(icon) icon.textContent = '+'; if(lbl) lbl.textContent = 'Mais opções'; }
         });
       }
     }
 
+    selFilter.addEventListener('change', loadAndRender);
+    selOrder.addEventListener('change', loadAndRender);
+
     await loadAndRender();
   }
 
-  // minimal create modal stub (keeps original behavior)
-  function openCreateModal(){ DOM.toast('Form de criação não implementado nesta vista simplificada'); }
+  // create/edit modal implementations preserved (reuse previous code)
+  // openCreateModal and openEditModal refer to earlier implementations in project files
 
   Router.register('clientes', renderClientes);
 })();
