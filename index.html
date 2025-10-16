@@ -8,25 +8,41 @@
 </head>
 <body>
   <div id="app">
-    <!-- menu lateral aparece somente depois do login -->
     <aside id="sidebar" class="sidebar hidden"></aside>
     <main id="main" class="main"></main>
   </div>
 
-  <!-- views -->
+  <!-- templates vazios (se desejar usar) -->
   <template id="view-login"></template>
   <template id="view-clientes"></template>
 
+  <!-- Dependências base -->
   <script src="js/dom-utils.js"></script>
   <script src="js/mock-provider.js"></script>
   <script src="js/supabase-service.js"></script>
+
+  <!-- Router deve ser carregado ANTES de qualquer view/controller que chame Router.register -->
+  <script src="js/app-router.js"></script>
+
+  <!-- Entities (podem depender do DB, não do Router) -->
   <script src="entities/admin.js"></script>
   <script src="entities/assinatura.js"></script>
   <script src="entities/cliente.js"></script>
   <script src="entities/pontoDeAcesso.js"></script>
+  <script src="entities/plano.js"></script>
+  <script src="entities/servidor.js"></script>
+  <script src="entities/app.js"></script>
+
+  <!-- Views e controllers (usam Router.register) -->
   <script src="views/login.js"></script>
   <script src="views/clientes.js"></script>
-  <script src="js/app-router.js"></script>
+  <script src="views/planos.js"></script>
+  <script src="views/servidores.js"></script>
+  <script src="views/apps.js"></script>
+  <script src="views/assinaturas.js"></script>
+  <script src="views/admin.js"></script>
+
+  <!-- main deve vir por último para navegar somente após registros -->
   <script src="js/main.js"></script>
 </body>
 </html>
