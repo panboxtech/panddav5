@@ -1,4 +1,4 @@
-// view login controller
+// views/login.js
 (function(){
   function renderLogin(){
     const main = document.getElementById('main');
@@ -35,11 +35,9 @@
         const admin = await AdminService.login(email, senha);
         window.sessionAdmin = {adminId: admin.id, adminMaster: !!admin.adminMaster};
         DOM.toast('Login efetuado');
-        // show sidebar
-        document.getElementById('sidebar').classList.remove('hidden');
-        // build sidebar menu
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.remove('hidden');
         buildSidebar();
-        // navigate to clientes
         Router.navigateTo('clientes');
       }catch(e){
         if(e.type === 'credentials') DOM.toast('Credenciais inválidas');
@@ -51,23 +49,70 @@
   function buildSidebar(){
     const sidebar = document.getElementById('sidebar');
     DOM.clearChildren(sidebar);
-    const title = DOM.createEl('div',{class:'small',text:'Menu'});
-    sidebar.appendChild(title);
-    const menu = DOM.createEl('div');
-    const mClientes = DOM.createEl('button',{class:'ghost',text:'Clientes'});
-    const mPlanos = DOM.createEl('button',{class:'ghost',text:'Planos'});
-    const mSair = DOM.createEl('button',{class:'ghost',text:'Sair'});
-    menu.appendChild(mClientes); menu.appendChild(mPlanos); menu.appendChild(mSair);
+
+    const header = DOM.createEl('div',{class:'menu-header'});
+    const title = DOM.createEl('div',{class:'small',text:'Pandda'});
+    const toggle = DOM.createEl('button',{class:'toggle-btn',text:'≡'});
+    header.appendChild(title); header.appendChild(toggle);
+    sidebar.appendChild(header);
+
+    const menu = DOM.createEl('div',{class:'menu-items'});
+    const items = [
+      {key:'clientes',label:'Clientes'},
+      {key:'planos',label:'Planos'},
+      {key:'servidores',label:'Servidores'},
+      {key:'apps',label:'Apps'},
+      {key:'assinaturas',label:'Assinaturas'},
+      {key:'admin',label:'Admin'}
+    ];
+    items.forEach(it=>{
+      const btn = DOM.createEl('button',{class:'menu-item',text:''});
+      const icon = DOM.createEl('span',{class:'icon',text:'•'});
+      const lbl = DOM.createEl('span',{class:'label',text:it.label});
+      btn.appendChild(icon); btn.appendChild(lbl);
+      btn.addEventListener('click', ()=> {
+        if(it.key === 'admin' && !(window.sessionAdmin && window.sessionAdmin.adminMaster)){
+          DOM.toast('Acesso restrito a Admin Master');
+          return;
+        }
+        Router.navigateTo(it.key);
+        if(window.innerWidth <= 800){
+          sidebar.classList.add('hidden');
+        }
+      });
+      menu.appendChild(btn);
+    });
     sidebar.appendChild(menu);
-    mClientes.addEventListener('click', ()=> Router.navigateTo('clientes'));
-    mPlanos.addEventListener('click', ()=> DOM.toast('Planos não implementado nesta demo'));
-    mSair.addEventListener('click', ()=>{
+
+    const spacer = DOM.createEl('div',{attrs:{style:'flex:1'}}); sidebar.appendChild(spacer);
+
+    const logout = DOM.createEl('button',{class:'menu-item',text:''});
+    logout.appendChild(DOM.createEl('span',{class:'icon',text:'⎋'}));
+    logout.appendChild(DOM.createEl('span',{class:'label',text:'Sair'}));
+    logout.addEventListener('click', ()=>{
       window.sessionAdmin = null;
-      document.getElementById('sidebar').classList.add('hidden');
+      sidebar.classList.add('hidden');
       Router.navigateTo('login');
     });
+    sidebar.appendChild(logout);
+
+    const onToggle = ()=> {
+      sidebar.classList.toggle('minimized');
+      // adjust main margin immediately
+      const main = document.querySelector('.main');
+      if(sidebar.classList.contains('minimized')) main.style.marginLeft = (window.innerWidth > 800 ? '56px' : '0');
+      else main.style.marginLeft = (window.innerWidth > 800 ? '220px' : '0');
+    };
+    toggle.addEventListener('click', onToggle);
+
+    // ensure main margin set based on current state
+    const main = document.querySelector('.main');
+    if(sidebar.classList.contains('minimized')) main.style.marginLeft = (window.innerWidth > 800 ? '56px' : '0');
+    else main.style.marginLeft = (window.innerWidth > 800 ? '220px' : '0');
+
+    // keep sidebar visible on desktop, hidden on mobile by default
+    if(window.innerWidth > 800) sidebar.classList.remove('hidden');
   }
 
-  // register view
   Router.register('login', renderLogin);
 })();
