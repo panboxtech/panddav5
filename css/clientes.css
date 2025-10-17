@@ -1,5 +1,5 @@
-/* clientes.css - listagem com filtro e botão de expansão full-width */
-.client-list{ display:flex; flex-direction:column; align-items:center; } /* center the column */
+/* clientes.css - listagem com filtro e botão de expansão full-width, centered and constrained */
+.client-list{ display:flex; flex-direction:column; align-items:center; }
 .client-list .card{ width:100%; max-width:980px; box-sizing:border-box; margin-bottom:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .client-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .client-meta{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
