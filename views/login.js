@@ -46,7 +46,8 @@
         window.sessionAdmin = {adminId: admin.id, adminMaster: !!admin.adminMaster};
         DOM.toast('Login efetuado');
         const sidebar = document.getElementById('sidebar');
-        if(sidebar) sidebar.classList.remove('hidden');
+        sidebar.classList.remove('hidden');
+        buildSidebar();
         Router.navigateTo('clientes');
       } catch(e){
         if(e.type === 'credentials') DOM.toast('Credenciais inválidas');
