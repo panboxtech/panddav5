@@ -1,4 +1,3 @@
-// views/login.js (com buildSidebar atualizado)
 (function(){
   function renderLogin(){
     const main = document.getElementById('main');
@@ -52,57 +51,10 @@
 
     const header = DOM.createEl('div',{class:'menu-header'});
     const title = DOM.createEl('div',{class:'small title',text:'Pandda'});
-    const toggle = DOM.createEl('button',{class:'toggle-btn',attrs:{'aria-label':'Minimizar menu'},text:'≡'});
+    const toggle = DOM.createEl('button',{class:'toggle-btn',text:'≡'});
     header.appendChild(title); header.appendChild(toggle);
     sidebar.appendChild(header);
 
     const menu = DOM.createEl('div',{class:'menu-items'});
     const items = [
-      {key:'clientes',label:'Clientes'},
-      {key:'planos',label:'Planos'},
-      {key:'servidores',label:'Servidores'},
-      {key:'apps',label:'Apps'},
-      {key:'assinaturas',label:'Assinaturas'},
-      {key:'admin',label:'Admin'}
-    ];
-    items.forEach(it=>{
-      const btn = DOM.createEl('button',{class:'menu-item',text:''});
-      const icon = DOM.createEl('span',{class:'icon',text:'•'});
-      const lbl = DOM.createEl('span',{class:'label',text:it.label});
-      btn.appendChild(icon); btn.appendChild(lbl);
-      btn.addEventListener('click', ()=> {
-        if(it.key === 'admin' && !(window.sessionAdmin && window.sessionAdmin.adminMaster)){
-          DOM.toast('Acesso restrito a Admin Master');
-          return;
-        }
-        Router.navigateTo(it.key);
-        if(window.innerWidth <= 800){
-          sidebar.classList.add('hidden');
-          document.body.classList.toggle('sidebar-visible', false);
-        }
-      });
-      menu.appendChild(btn);
-    });
-    sidebar.appendChild(menu);
-
-    const spacer = DOM.createEl('div',{attrs:{style:'flex:1'}});
-    sidebar.appendChild(spacer);
-
-    const logout = DOM.createEl('button',{class:'menu-item',text:''});
-    logout.appendChild(DOM.createEl('span',{class:'icon',text:'⎋'}));
-    logout.appendChild(DOM.createEl('span',{class:'label',text:'Sair'}));
-    logout.addEventListener('click', ()=>{
-      window.sessionAdmin = null;
-      sidebar.classList.add('hidden');
-      document.body.classList.remove('sidebar-visible');
-      Router.navigateTo('login');
-    });
-    sidebar.appendChild(logout);
-
-    if(window && typeof window.setTimeout === 'function'){
-      setTimeout(()=>{ document.body.classList.toggle('sidebar-visible', !sidebar.classList.contains('hidden')); }, 0);
-    }
-  }
-
-  Router.register('login', renderLogin);
-})();
+      {key:'clientes
