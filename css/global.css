@@ -27,7 +27,7 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
   box-shadow:0 2px 8px rgba(18,30,50,0.04);
 }
 
-/* estado oculto (mobile) */
+/* estado oculto (mobile overlay) */
 .sidebar.hidden{
   transform:translateX(-120%);
   opacity:0;
@@ -53,48 +53,47 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
   background:transparent;border:1px solid #e6eef6;padding:6px;border-radius:6px;cursor:pointer;color:var(--muted)
 }
 .sidebar .menu-item .icon{width:18px;display:inline-block;text-align:center;color:var(--muted)}
-
-/* hide title when minimized */
 .sidebar.minimized .menu-header .title{display:none}
 
-/* MAIN area: margem esquerda definida por classes no body para acompanhar sidebar */
+/* Main must always reserve space on desktop via body classes.
+   On mobile the sidebar overlays (no margin) */
 .main{
   transition:margin-left 220ms ease, padding 120ms ease;
   padding:18px;
   min-height:100vh;
   box-sizing:border-box;
-}
-
-/* Quando body indicar que a sidebar está visível e não minimizada */
-body.sidebar-visible:not(.sidebar-minimized) .main{
-  margin-left:220px;
-}
-
-/* Quando body indicar que a sidebar está visível mas minimizada */
-body.sidebar-visible.sidebar-minimized .main{
-  margin-left:56px;
-}
-
-/* Quando sidebar oculta (mobile) - main ocupa toda a largura */
-body.sidebar-hidden .main{
   margin-left:0;
 }
 
-/* Para telas pequenas, sidebar atua como overlay (mantemos classes mas não alteramos layout) */
+/* Desktop: when sidebar visible reserve 220px; when minimized reserve 56px */
+@media (min-width:801px){
+  body.sidebar-visible:not(.sidebar-minimized) .main{ margin-left:220px; }
+  body.sidebar-visible.sidebar-minimized .main{ margin-left:56px; }
+  body.sidebar-hidden .main{ margin-left:0; }
+}
+
+/* Mobile: main never shifts horizontally when sidebar overlays */
 @media (max-width:800px){
-  /* quando sidebar está visível no mobile, body.sidebar-visible continua; mas a main não terá margin-left */
   body.sidebar-visible .main{ margin-left:0; }
 }
 
-/* container centralizado e largura máxima para evitar "salto" o conteúdo */
+/* Container centralizado e largura máxima para evitar "salto" do conteúdo */
 .container{
   max-width:1100px;
   margin-left:auto;
   margin-right:auto;
-  padding-left:12px;
-  padding-right:12px;
+  padding-left:16px;
+  padding-right:16px;
   width:100%;
   box-sizing:border-box;
+}
+
+/* Padding refinements por breakpoint */
+@media (min-width:801px){
+  .main{ padding-left:18px; padding-right:18px; }
+}
+@media (max-width:800px){
+  .main{ padding-left:12px; padding-right:12px; }
 }
 
 /* retained common styles */
