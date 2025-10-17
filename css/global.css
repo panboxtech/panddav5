@@ -9,8 +9,12 @@
 html,body,#app{height:100%;margin:0;background:var(--bg);}
 #app{display:flex;gap:0;min-height:100vh}
 
-/* Sidebar */
+/* Sidebar: fixa e fora do fluxo visual; largura controlada por classes no body */
 .sidebar{
+  position:fixed;
+  left:0;
+  top:0;
+  bottom:0;
   width:220px;
   background:linear-gradient(180deg,#ffffff,#fbfdff);
   border-right:1px solid #e6eef6;
@@ -18,14 +22,22 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
   display:flex;
   flex-direction:column;
   gap:8px;
-  transition:width 200ms ease, transform 200ms ease, left 200ms ease;
+  transition:width 220ms ease, transform 220ms ease, opacity 180ms ease;
   z-index:1000;
-  box-shadow: 0 2px 8px rgba(18,30,50,0.03);
-  position:fixed; /* fixado para não alterar fluxo quando visível */
-  left:0; top:0; bottom:0;
+  box-shadow:0 2px 8px rgba(18,30,50,0.04);
 }
-.sidebar.hidden{ transform:translateX(-120%); pointer-events:none; opacity:0; }
-.sidebar.minimized{ width:56px; }
+
+/* estado oculto (mobile) */
+.sidebar.hidden{
+  transform:translateX(-120%);
+  opacity:0;
+  pointer-events:none;
+}
+
+/* estado minimizado (apenas ícones visíveis) */
+.sidebar.minimized{
+  width:56px;
+}
 
 /* header, items */
 .sidebar .menu-header{display:flex;align-items:center;justify-content:space-between;padding:8px}
@@ -45,38 +57,47 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
 /* hide title when minimized */
 .sidebar.minimized .menu-header .title{display:none}
 
-/* MAIN area: do not let sidebar overlap content on desktop.
-   We keep main margin that accounts for sidebar width only when sidebar is visible and viewport >= 801px.
-*/
+/* MAIN area: margem esquerda definida por classes no body para acompanhar sidebar */
 .main{
-  transition:margin-left 200ms ease,padding 120ms ease;
+  transition:margin-left 220ms ease, padding 120ms ease;
   padding:18px;
   min-height:100vh;
+  box-sizing:border-box;
 }
 
-/* default: desktop wide - reserve space for sidebar (220) */
-@media (min-width:801px){
-  body.sidebar-visible .main{ margin-left:220px; }
-  body.sidebar-visible.sidebar-minimized .main{ margin-left:56px; }
+/* Quando body indicar que a sidebar está visível e não minimizada */
+body.sidebar-visible:not(.sidebar-minimized) .main{
+  margin-left:220px;
 }
 
-/* mobile: sidebar overlays content, main gets zero margin and remains centered */
+/* Quando body indicar que a sidebar está visível mas minimizada */
+body.sidebar-visible.sidebar-minimized .main{
+  margin-left:56px;
+}
+
+/* Quando sidebar oculta (mobile) - main ocupa toda a largura */
+body.sidebar-hidden .main{
+  margin-left:0;
+}
+
+/* Para telas pequenas, sidebar atua como overlay (mantemos classes mas não alteramos layout) */
 @media (max-width:800px){
-  .main{ margin-left:0; padding:16px; }
-  .sidebar{ transform:translateX(0); } /* when visible overlays */
+  /* quando sidebar está visível no mobile, body.sidebar-visible continua; mas a main não terá margin-left */
+  body.sidebar-visible .main{ margin-left:0; }
 }
 
-/* container centered with max-width to avoid left-shift at small widths */
+/* container centralizado e largura máxima para evitar "salto" o conteúdo */
 .container{
   max-width:1100px;
-  margin:0 auto;
+  margin-left:auto;
+  margin-right:auto;
+  padding-left:12px;
+  padding-right:12px;
   width:100%;
   box-sizing:border-box;
-  padding-left:8px;
-  padding-right:8px;
 }
 
-/* ensure lists/cards constrained so they won't be covered */
+/* retained common styles */
 .card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 1px 4px rgba(20,30,40,0.04)}
 .h1{font-size:20px;margin:0 0 12px}
 .form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
