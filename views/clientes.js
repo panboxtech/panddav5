@@ -28,8 +28,25 @@
     wrap.appendChild(listCard);
     main.appendChild(wrap);
 
-    btnNovo.addEventListener('click', ()=> openCreateModal());
-
+   // garantir que openCreateModal exista antes de chamar
+btnNovo.addEventListener('click', ()=>{
+  if(typeof openCreateModal === 'function'){
+    try { openCreateModal(); }
+    catch(err){
+      console.error('Erro ao abrir modal de criação:', err);
+      DOM.toast('Erro ao abrir formulário de criação');
+    }
+  } else if(typeof window.openCreateModal === 'function'){
+    try { window.openCreateModal(); }
+    catch(err){
+      console.error('Erro ao abrir modal global de criação:', err);
+      DOM.toast('Erro ao abrir formulário de criação');
+    }
+  } else {
+    console.error('openCreateModal não encontrada em views/clientes.js');
+    DOM.toast('Formulário de criação indisponível no momento');
+  }
+});
     async function loadAndRender(){
       DOM.clearChildren(listCard);
       let clients = await DB.getAll('clientes');
