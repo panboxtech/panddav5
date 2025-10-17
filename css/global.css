@@ -19,11 +19,12 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
   flex-direction:column;
   gap:8px;
   transition:width 200ms ease, transform 200ms ease, left 200ms ease;
-  z-index:70;
+  z-index:1000;
   box-shadow: 0 2px 8px rgba(18,30,50,0.03);
-  position:relative;
+  position:fixed; /* fixado para não alterar fluxo quando visível */
+  left:0; top:0; bottom:0;
 }
-.sidebar.hidden{ display:none; transform:translateX(-120%); }
+.sidebar.hidden{ transform:translateX(-120%); pointer-events:none; opacity:0; }
 .sidebar.minimized{ width:56px; }
 
 /* header, items */
@@ -41,36 +42,47 @@ html,body,#app{height:100%;margin:0;background:var(--bg);}
 }
 .sidebar .menu-item .icon{width:18px;display:inline-block;text-align:center;color:var(--muted)}
 
-/* remove label from composition when minimized (using aria-hidden and pointer-events none via class) */
-.sidebar.minimized .menu-item{pointer-events:auto}
-.sidebar.minimized .menu-item .label{display:none}
+/* hide title when minimized */
 .sidebar.minimized .menu-header .title{display:none}
 
-/* ensure fixed buttons (not responsive) */
-@media(max-width:800px){
-  .sidebar{ position:fixed; left:0; top:0; bottom:0; transform:translateX(0); }
-  .sidebar.hidden{ transform:translateX(-120%); display:block; } 
+/* MAIN area: do not let sidebar overlap content on desktop.
+   We keep main margin that accounts for sidebar width only when sidebar is visible and viewport >= 801px.
+*/
+.main{
+  transition:margin-left 200ms ease,padding 120ms ease;
+  padding:18px;
+  min-height:100vh;
 }
 
-/* main content adjusts with sidebar width; when sidebar overlays (mobile) main margin is 0 */
-.main{transition:margin-left 200ms ease;padding:18px}
-.sidebar + .main{margin-left:220px}
-.sidebar.minimized + .main{margin-left:56px}
-@media(max-width:800px){
-  .sidebar + .main{margin-left:0}
+/* default: desktop wide - reserve space for sidebar (220) */
+@media (min-width:801px){
+  body.sidebar-visible .main{ margin-left:220px; }
+  body.sidebar-visible.sidebar-minimized .main{ margin-left:56px; }
 }
 
-/* Prevent sidebar covering content when visible on desktop: ensure it's in layout flow (position:relative above) */
-/* When minimized, hide textual elements (already handled), but keep toggle visible */
+/* mobile: sidebar overlays content, main gets zero margin and remains centered */
+@media (max-width:800px){
+  .main{ margin-left:0; padding:16px; }
+  .sidebar{ transform:translateX(0); } /* when visible overlays */
+}
 
-/* existing styles retained */
-.container{max-width:1100px;margin:0 auto}
+/* container centered with max-width to avoid left-shift at small widths */
+.container{
+  max-width:1100px;
+  margin:0 auto;
+  width:100%;
+  box-sizing:border-box;
+  padding-left:8px;
+  padding-right:8px;
+}
+
+/* ensure lists/cards constrained so they won't be covered */
 .card{background:var(--card);padding:16px;border-radius:var(--radius);box-shadow:0 1px 4px rgba(20,30,40,0.04)}
 .h1{font-size:20px;margin:0 0 12px}
 .form-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .form-row.column{flex-direction:column;align-items:stretch}
 input[type="text"],input[type="email"],input[type="password"],input[type="date"],input[type="number"],select,textarea{
-  padding:8px;border:1px solid #d9e6f6;border-radius:6px;background:#fff;font-size:14px
+  padding:8px;border:1px solid #d9e6f6;border-radius:6px;background:#fff;font-size:14px;width:100%
 }
 button{padding:8px 12px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer}
 button.ghost{background:transparent;border:1px solid #cfe4fb;color:var(--accent)}
