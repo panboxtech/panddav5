@@ -1,4 +1,4 @@
-// js/main.js - controle do estado do sidebar e inicialização segura (corrigido)
+// js/main.js - controle do estado do sidebar e inicialização segura (corrigido para clique-fora mobile)
 (function(){
   function syncBodyClasses(){
     const body = document.body;
@@ -10,37 +10,46 @@
     body.classList.toggle('sidebar-minimized', sidebar.classList.contains('minimized'));
   }
 
-  function openSidebarIfHidden(){
-    const sidebar = document.getElementById('sidebar');
-    if(!sidebar) return;
-    if(sidebar.classList.contains('hidden')){
-      sidebar.classList.remove('hidden');
-    }
-  }
-
   function toggleSidebarMinimize(){
     const sidebar = document.getElementById('sidebar');
     if(!sidebar) return;
-
-    // if currently hidden (mobile), just open it (do not toggle minimize)
     if(sidebar.classList.contains('hidden')){
+      // abrir a sidebar a partir do estado oculto (mobile)
       sidebar.classList.remove('hidden');
-      // ensure not minimized when opening from hidden
       sidebar.classList.remove('minimized');
     } else if(sidebar.classList.contains('minimized')){
-      // if minimized, expand to full width
+      // restaurar quando estava minimizada
       sidebar.classList.remove('minimized');
     } else {
-      // normal toggle to minimized
+      // minimizar normalmente
       sidebar.classList.add('minimized');
     }
     syncBodyClasses();
   }
 
-  // centralizar ação do botão toggle (event delegation)
+  // Abre a sidebar se estiver oculta
+  function openSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    if(!sidebar) return;
+    sidebar.classList.remove('hidden');
+    sidebar.classList.remove('minimized');
+    syncBodyClasses();
+  }
+
+  // Fecha (oculta) a sidebar — usado apenas para overlay mobile
+  function hideSidebar(){
+    const sidebar = document.getElementById('sidebar');
+    if(!sidebar) return;
+    sidebar.classList.add('hidden');
+    syncBodyClasses();
+  }
+
+  // Handler global para o botão toggle (event delegation)
   document.addEventListener('click', (ev)=>{
     const btn = ev.target.closest && ev.target.closest('.toggle-btn');
     if(btn){
+      // evita que o mesmo clique chegue ao clique-fora
+      ev.stopPropagation();
       toggleSidebarMinimize();
       const sidebar = document.getElementById('sidebar');
       if(sidebar && sidebar.classList.contains('minimized')) btn.setAttribute('aria-label','Maximizar menu');
@@ -48,29 +57,34 @@
     }
   });
 
-  // fechar sidebar ao clicar fora somente quando estiver visível e não minimizado (mobile overlay)
-  document.addEventListener('click', (ev)=>{
+  // Clique/Toque fora: fechar somente quando mobile (<=800), sidebar visível e NÃO minimizada
+  function handleClickOutside(ev){
     const sidebar = document.getElementById('sidebar');
     if(!sidebar) return;
-    // only when viewport is mobile-like and sidebar currently visible as overlay
-    if(window.innerWidth <= 800){
-      const isVisible = !sidebar.classList.contains('hidden');
-      const isMinimized = sidebar.classList.contains('minimized');
-      if(isVisible && !isMinimized){
-        if(!sidebar.contains(ev.target) && !ev.target.closest('.toggle-btn')){
-          sidebar.classList.add('hidden');
-          syncBodyClasses();
-        }
+    // condição mobile
+    if(window.innerWidth > 800) return;
+    const isVisible = !sidebar.classList.contains('hidden');
+    const isMinimized = sidebar.classList.contains('minimized');
+    // somente fechar se estiver visível e não minimizada
+    if(isVisible && !isMinimized){
+      const clickedToggle = ev.target.closest && ev.target.closest('.toggle-btn');
+      const clickedInsideSidebar = sidebar.contains(ev.target);
+      if(!clickedInsideSidebar && !clickedToggle){
+        hideSidebar();
       }
     }
-  });
+  }
 
-  // redimensionamento: garantir sidebar visível no desktop e classes sincronizadas
+  // suportar clicks e toques (touchstart) para dispositivos mobile
+  document.addEventListener('click', handleClickOutside);
+  document.addEventListener('touchstart', handleClickOutside);
+
+  // resize: garantir sidebar visível no desktop e sincronizar classes
   window.addEventListener('resize', ()=>{
     const sidebar = document.getElementById('sidebar');
     if(!sidebar) return;
     if(window.innerWidth > 800){
-      // on desktop always show sidebar (unless explicitly hidden by user? this keeps consistent)
+      // mostrar sidebar no desktop (mantendo minimized se estiver)
       sidebar.classList.remove('hidden');
     }
     syncBodyClasses();
