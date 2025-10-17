@@ -1,4 +1,4 @@
-// views/login.js (buildSidebar adjusted to toggle aria and label visibility)
+// views/login.js (com buildSidebar atualizado)
 (function(){
   function renderLogin(){
     const main = document.getElementById('main');
@@ -78,13 +78,15 @@
         Router.navigateTo(it.key);
         if(window.innerWidth <= 800){
           sidebar.classList.add('hidden');
+          document.body.classList.toggle('sidebar-visible', false);
         }
       });
       menu.appendChild(btn);
     });
     sidebar.appendChild(menu);
 
-    const spacer = DOM.createEl('div',{attrs:{style:'flex:1'}}); sidebar.appendChild(spacer);
+    const spacer = DOM.createEl('div',{attrs:{style:'flex:1'}});
+    sidebar.appendChild(spacer);
 
     const logout = DOM.createEl('button',{class:'menu-item',text:''});
     logout.appendChild(DOM.createEl('span',{class:'icon',text:'⎋'}));
@@ -92,34 +94,14 @@
     logout.addEventListener('click', ()=>{
       window.sessionAdmin = null;
       sidebar.classList.add('hidden');
+      document.body.classList.remove('sidebar-visible');
       Router.navigateTo('login');
     });
     sidebar.appendChild(logout);
 
-    // toggle behavior: minimize / maximize
-    const onToggle = ()=> {
-      const isMin = sidebar.classList.toggle('minimized');
-      // update ARIA and toggle button label exposed visually (we hide title when minimized)
-      if(isMin){
-        toggle.setAttribute('aria-label','Maximizar menu');
-        // remove title from composition
-        sidebar.querySelectorAll('.label').forEach(l=> l.setAttribute('aria-hidden','true'));
-        sidebar.querySelectorAll('.title').forEach(t=> t.setAttribute('aria-hidden','true'));
-        // ensure main margin updates
-        const main = document.querySelector('.main');
-        if(main) main.style.marginLeft = (window.innerWidth > 800 ? '56px' : '0');
-      } else {
-        toggle.setAttribute('aria-label','Minimizar menu');
-        sidebar.querySelectorAll('.label').forEach(l=> l.removeAttribute('aria-hidden'));
-        sidebar.querySelectorAll('.title').forEach(t=> t.removeAttribute('aria-hidden'));
-        const main = document.querySelector('.main');
-        if(main) main.style.marginLeft = (window.innerWidth > 800 ? '220px' : '0');
-      }
-    };
-    toggle.addEventListener('click', onToggle);
-
-    // initial state
-    if(window.innerWidth > 800) sidebar.classList.remove('hidden');
+    if(window && typeof window.setTimeout === 'function'){
+      setTimeout(()=>{ document.body.classList.toggle('sidebar-visible', !sidebar.classList.contains('hidden')); }, 0);
+    }
   }
 
   Router.register('login', renderLogin);
