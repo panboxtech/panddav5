@@ -1,5 +1,6 @@
 /* clientes.css - listagem com filtro e botão de expansão full-width */
-.client-list .card{margin-bottom:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.client-list{ display:flex; flex-direction:column; align-items:center; } /* center the column */
+.client-list .card{ width:100%; max-width:980px; box-sizing:border-box; margin-bottom:10px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .client-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .client-meta{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
 .client-actions{display:flex;gap:8px;align-items:center}
@@ -25,8 +26,8 @@
 }
 .client-actions .btn, .expand-toggle{min-height:40px}
 
-/* Filter bar */
-.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+/* Filter bar centered and constrained */
+.filter-bar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;justify-content:center; width:100%; max-width:980px; margin-left:auto; margin-right:auto;}
 .filter-bar select, .filter-bar .btn{min-height:40px;padding:8px 10px}
 
 /* responsive adjustments */
